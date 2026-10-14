@@ -1,0 +1,38 @@
+name: terraform-modul7
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'modul7/**'
+      - '.github/workflows/terraform-modul7.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'modul7/**'
+      - '.github/workflows/terraform-modul7.yml'
+
+permissions:
+  id-token: write        # OIDC mot Azure (modul 6)
+  contents: read
+  pull-requests: write   # for å poste planen tilbake i PR-en
+
+defaults:
+  run:
+    working-directory: modul7     # her bor Terraform-rota
+
+env:
+  ARM_USE_OIDC:        "true"
+  ARM_CLIENT_ID:       ${{ vars.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID:       ${{ vars.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform fmt -check -recursive
+      - run: terraform init -backend=false
+      - run: terraform validate
