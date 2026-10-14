@@ -21,7 +21,7 @@ locals {
 
 resource "azurerm_resource_group" "main" {
   name     = "${local.name_prefix}-rg"
-  location= var.location
+  location = var.location
 }
 
 module "network" {
