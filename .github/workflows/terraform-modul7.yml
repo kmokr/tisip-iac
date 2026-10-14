@@ -16,6 +16,10 @@ permissions:
   id-token: write        # OIDC mot Azure (modul 6)
   contents: read
   pull-requests: write   # for å poste planen tilbake i PR-en
+  
+concurrency:
+  group: terraform-modul7-${{ github.ref }}
+  cancel-in-progress: false   #false for å unngå at en apply avbrytes og skaper en hengende lås
 
 defaults:
   run:
