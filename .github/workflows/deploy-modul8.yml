@@ -1,0 +1,54 @@
+
+name: deploy-modul8
+
+on:
+  push:
+    tags: ['modul8-v*']    # bare modul8-taggene starter en utrulling
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-modul8
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: modul8
+
+env:
+  ARM_USE_OIDC: "true"
+  ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform fmt -check -recursive
+      - run: terraform init -backend=false
+      - run: terraform validate
+
+  deploy-dev:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Azure/login@v3.1.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - uses: hashicorp/setup-terraform@v3
+      - run: |
+          terraform init \
+            -backend-config=backend.hcl \
+            -backend-config="key=modul8/dev/network.tfstate"
+      - run: terraform apply -auto-approve -var-file="dev.tfvars"
+
+  
