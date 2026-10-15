@@ -25,7 +25,7 @@ resource "azurerm_resource_group" "main" {
 }
 
 module "network" {
-  source              = "./modules/network"
+  source              = "git::https://github.com/kmokr/tisip-iac.git//modules/network?ref=network-v1.1.0"
   name_prefix         = local.name_prefix
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
