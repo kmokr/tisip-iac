@@ -34,8 +34,8 @@ variable "subnet_address_prefix" {
   default     = ["10.0.1.0/24"]
 }
 
-variable "ssh_source_prefix" {
-  type        = string
-  description = "Hvor SSH (port 22) er tillatt fra. Aldri \"*\"."
-  default     = "VirtualNetwork" # Azure-tag: bare trafikk fra eget VNet
-}
+# variable "ssh_source_prefix" {
+#   type        = string
+#   description = "Hvor SSH (port 22) er tillatt fra. Aldri \"*\"."
+#   default     = "VirtualNetwork"
+# }
