@@ -1,0 +1,52 @@
+
+name: test-network
+
+on:
+  pull_request:
+    branches: [main]          # alle PR-er – ingen paths:
+  workflow_dispatch:
+
+permissions:
+  contents: read              # ingen id-token: testene trenger ikke Azure
+
+jobs:
+  test-network:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: modules/network
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.16.5"
+
+      - uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: v0.65.0
+
+      - name: Installer Checkov
+        run: pipx install checkov==3.4.3
+
+      - name: fmt
+        run: terraform fmt -check -diff -recursive
+
+      - name: init
+        run: terraform init -backend=false -input=false
+
+      - name: validate
+        run: terraform validate
+
+      - name: tflint
+        run: |
+          tflint --init
+          tflint
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: checkov
+        run: checkov -d .
+
+      - name: test
+        run: terraform test
